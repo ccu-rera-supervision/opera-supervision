@@ -640,17 +640,14 @@
     var items = [];
     for (var i = 0; i < msgs.length; i++) {
       var body = '';
-      // Concatener TOUS les segments Message[] pour avoir le texte complet
+      // Prendre le segment Message le plus long (le plus complet)
       try {
         var segments = msgs[i].Content.Message || [];
-        var parts = [];
         for (var s = 0; s < segments.length; s++) {
           var val = (segments[s].MessageText && segments[s].MessageText.value) || '';
-          val = val.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-          if (val) parts.push(val);
+          val = val.replace(/<[^>]+>/g, ' ').replace(/  +/g, ' ').trim();
+          if (val.length > body.length) body = val;
         }
-        body = parts.join(' ').replace(/\s+/g, ' ').trim();
-        if (!body) body = msgs[i].Content.Message[0].MessageText.value;
       } catch(e) {}
       if (!body) continue;
       // Heure de publication
