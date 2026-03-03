@@ -72,7 +72,7 @@
     /* ── LAYOUT PRINCIPAL ── */
     .main-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 0.5rem;
       flex: 1;
       min-height: 0;
@@ -88,7 +88,7 @@
 
     /* Colonne droite : SNCF + RATP empilés */
     .col-right {
-      display: none;
+      display: flex;
       flex-direction: column;
       gap: 0.5rem;
       min-height: 0;
@@ -203,11 +203,11 @@
 
     /* ── COLONNE DROITE masquée si aucun message ── */
     .col-right { transition: opacity 0.5s; }
-    .col-right.hidden { display: none; }
+    
 
     /* Quand col-right masquée, col-left prend tout l'espace */
     .main-grid.no-comm {
-      grid-template-columns: 1fr;
+      grid-template-columns:1fr 1fr;
     }
 
     /* ── COMMUNICATION (droite) ── */
@@ -302,19 +302,15 @@
       background-size: cover; background-position: center;
     }
     #overlay-fin-service.visible { display: block; }
-  
-    /* ── MUR IMAGES : layout adaptatif ── */
-    .panel-trafic { flex: 0 0 auto; min-height: 18vh; max-height: 38vh; }
-    .trafic-body { padding: 1vh 1rem; display: flex; align-items: center; justify-content: center; height: 100%; }
-    .trafic-capsule { width: 90%; padding: clamp(0.5rem,2.5vh,3rem) clamp(1rem,5vw,6rem); border-radius: clamp(8px,1.5vw,20px); display: flex; align-items: center; justify-content: center; transition: background 0.5s; }
-    .trafic-label { font-family: 'Barlow Condensed',sans-serif; font-weight: 900; font-size: clamp(2rem,9vw,15vw); color: white; letter-spacing: 0.05em; text-transform: uppercase; }
-    .panel-title { font-size: clamp(1rem,2vw,2.2rem) !important; }
-    .delay-cols { align-content: space-evenly; }
-    .delay-row { padding: clamp(0.2rem,0.8vh,1rem) 0; gap: clamp(0.3rem,0.8vw,1rem); }
-    .delay-mission { font-size: clamp(1rem,5vw,10vw) !important; white-space: nowrap; }
-    .delay-mins { font-size: clamp(0.9rem,4.5vw,9vw) !important; white-space: nowrap; }
-    .no-delay { font-size: clamp(1rem,3vw,4rem) !important; }
 
+    .panel-trafic{flex:0 0 auto;min-height:22vh;max-height:40vh;}
+    .trafic-body{padding:1.5vh 1rem;display:flex;align-items:center;justify-content:center;height:100%;}
+    .trafic-capsule{width:95%!important;padding:clamp(.4rem,2vh,2.5rem) clamp(1rem,4vw,5rem)!important;border-radius:clamp(6px,1vw,16px)!important;}
+    .trafic-label{font-size:clamp(2rem,7vw,12vw)!important;}
+    .panel-title{font-size:clamp(.9rem,1.6vw,2rem)!important;}
+    .delay-row{padding:clamp(.2rem,.8vh,1rem) 0!important;}
+    .delay-mission{white-space:nowrap;}
+    .delay-mins{white-space:nowrap;}
   </style>
 </head>
 <body>
@@ -356,43 +352,7 @@
 
   </div>
 
-  <!-- COLONNE DROITE : Communication SNCF + RATP -->
-  <div class="col-right">
-
-    <!-- Communication SNCF -->
-    <div class="panel panel-comm">
-      <div class="panel-title">
-        <div class="panel-title-wrap">
-          <div class="panel-title-row">
-            <span>🚆 Communication SNCF</span>
-            <span class="panel-timer" id="timer-sncf">20s</span>
-          </div>
-
-        </div>
-      </div>
-      <div class="panel-body" id="panel-comm-sncf">
-        <div class="no-comm">Chargement…</div>
-      </div>
-    </div>
-
-    <!-- Communication RATP -->
-    <div class="panel panel-comm">
-      <div class="panel-title">
-        <div class="panel-title-wrap">
-          <div class="panel-title-row">
-            <span>🚇 Communication RATP</span>
-            <span class="panel-timer" id="timer-ratp">20s</span>
-          </div>
-
-        </div>
-      </div>
-      <div class="panel-body" id="panel-comm-ratp">
-        <div class="no-comm">Chargement…</div>
-      </div>
-    </div>
-
-  </div>
-
+  <div class="col-right"><div style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;"><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:clamp(0.9rem,1.6vw,2rem);letter-spacing:.1em;text-transform:uppercase;color:white;text-align:center;padding:.45rem 1rem;background:var(--bg3);border-bottom:1px solid var(--border);">Retards en cours</div><div style="padding:.6rem 1rem;flex:1;overflow:hidden;" id="panel-retards-right"><div style="color:var(--muted);display:flex;align-items:center;justify-content:center;height:100%;">—</div></div></div><div style="display:none;position:absolute;"><div id="panel-comm-sncf"></div><div id="panel-comm-ratp"></div><span id="timer-sncf"></span><span id="timer-ratp"></span></div></div>
 </div>
 
 <!-- INFOGRAPHIE (cachée par défaut) -->
@@ -546,14 +506,7 @@
     for (var n = 0; n < retards.length; n++) newPrev[retards[n].mission] = true;
     prevMissions = newPrev;
 
-    el.innerHTML = '<div class="delay-cols"><div>' + buildCol(col1) + '</div><div>' + buildCol(col2) + '</div></div>';
-    var n = retards.length;
-    var vwM = n <= 1 ? 11 : n <= 2 ? 9 : n <= 4 ? 6.5 : n <= 6 ? 5 : 3.5;
-    var vwm = vwM * 0.88;
-    var rows = el.querySelectorAll('.delay-mission');
-    for (var ri=0; ri<rows.length; ri++) rows[ri].style.fontSize = vwM + 'vw';
-    var mins = el.querySelectorAll('.delay-mins');
-    for (var mi=0; mi<mins.length; mi++) mins[mi].style.fontSize = vwm + 'vw';
+    el.innerHTML='<div style="display:flex;flex-direction:column;">'+buildCol(col1)+'</div>';var elR=document.getElementById('panel-retards-right');if(elR){elR.innerHTML=col2.length?'<div style="display:flex;flex-direction:column;">'+buildCol(col2)+'</div>':'<div style="color:var(--muted);display:flex;align-items:center;justify-content:center;height:100%;">—</div>';}var n=retards.length;var vwM=n<=2?9:n<=4?7:n<=6?5.5:4;document.querySelectorAll('.delay-mission').forEach(function(e){e.style.fontSize=vwM+'vw';});document.querySelectorAll('.delay-mins').forEach(function(e){e.style.fontSize=(vwM*0.88)+'vw';});
   }
 
   // ── ÉTAT TRAFIC ───────────────────────────────────────────
@@ -592,7 +545,7 @@
   var carousels = {};
   var commHasMessages = { sncf: false, ratp: false };
 
-  function updateCommColumnVisibility() { return;
+  function updateCommColumnVisibility(){return;
     var colRight = document.querySelector('.col-right');
     var mainGrid = document.querySelector('.main-grid');
     var hasAny = commHasMessages.sncf || commHasMessages.ratp;
