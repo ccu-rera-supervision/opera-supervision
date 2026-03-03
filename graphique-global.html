@@ -195,6 +195,10 @@
     .comm-sncf {
       background: var(--bg2); border: 1px solid var(--border);
       border-radius: 10px; overflow: hidden; flex-shrink: 0;
+      transition: opacity 0.4s ease;
+    }
+    .comm-sncf.masque {
+      display: none;
     }
     .comm-sncf-title {
       font-family: 'Barlow Condensed', sans-serif;
@@ -572,7 +576,7 @@
   var PROXY        = 'https://rera-proxy.sammy-avcuoglu.workers.dev/proxy';
   var LINE         = 'STIF:Line::C01742:';
   var LINE_NAVITIA = 'IDFM:C01742';
-  var INTERVALLE   = 45000;
+  var INTERVALLE   = 25000;
 
   // ── IDs gares ──
   var STOPS = {
@@ -708,6 +712,14 @@
   function renderCarousel(id, items) {
     if (carousels[id]) { clearInterval(carousels[id]); delete carousels[id]; }
     var el = document.getElementById(id);
+    // Masquer/afficher le panneau SNCF selon présence de messages
+    if (id === 'panel-comm-sncf') {
+      var panneau = el && el.closest ? el.closest('.comm-sncf') : document.querySelector('.comm-sncf');
+      if (panneau) {
+        if (!items.length) { panneau.classList.add('masque'); }
+        else { panneau.classList.remove('masque'); }
+      }
+    }
     if (!items.length) { el.innerHTML='<div class="no-comm">Aucun message en cours.</div>'; return; }
     if (items.length === 1) {
       var t = items[0].time ? '<div class="comm-time">'+esc(items[0].time)+'</div>' : '';
