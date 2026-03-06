@@ -545,7 +545,7 @@
     for (var n = 0; n < retards.length; n++) newPrev[retards[n].mission] = true;
     prevMissions = newPrev;
 
-    var nbTotal = retards.length; var sizeClass = nbTotal <= 3 ? 'few' : nbTotal <= 6 ? 'medium' : 'many'; el.innerHTML = '<div class="delay-cols ' + sizeClass + '"><div>' + buildCol(col1) + '</div><div>' + buildCol(col2) + '</div></div>';
+    var nbTotal = retards.length; var sizeClass = nbTotal <= 6 ? 'few' : nbTotal <= 10 ? 'medium' : 'many'; el.innerHTML = '<div class="delay-cols ' + sizeClass + '"><div>' + buildCol(col1) + '</div><div>' + buildCol(col2) + '</div></div>';
   }
 
   // ── ÉTAT TRAFIC ───────────────────────────────────────────
