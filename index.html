@@ -161,11 +161,14 @@
       grid-template-columns: 1fr 1fr;
       gap: 0 2rem;
       height: 100%;
-      align-content: start;
+      align-content: stretch;
+      overflow: hidden;
     }
     .delay-row {
-      display: flex; align-items: baseline; gap: 0.6rem;
-      padding: 0.6rem 0;
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.3rem 0;
+      flex: 1;
+      min-height: 0;
       border-bottom: 2px solid var(--border);
       flex-wrap: nowrap;
       min-width: 0;
@@ -173,17 +176,26 @@
     .delay-row:last-child { border-bottom: none; }
     .delay-mission {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800; font-size: 4.5vw;
+      font-weight: 800; font-size: clamp(1rem, 3.5vw, 4.5vw);
       color: white; letter-spacing: 0.03em;
       white-space: nowrap; flex-shrink: 0;
     }
     .delay-mins {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700; font-size: 4vw;
+      font-weight: 700; font-size: clamp(0.9rem, 3vw, 4vw);
       white-space: nowrap; flex-shrink: 0;
     }
     .delay-mins.orange { color: var(--orange); }
     .delay-mins.red    { color: var(--red); }
+    /* Adaptation taille selon nombre de trains — max 6 visibles */
+    .delay-cols.few .delay-mission    { font-size: clamp(1.5rem, 4.5vw, 5vw); }
+    .delay-cols.few .delay-mins       { font-size: clamp(1.3rem, 4vw, 4.5vw); }
+    .delay-cols.medium .delay-mission { font-size: clamp(1rem, 3vw, 3.5vw); }
+    .delay-cols.medium .delay-mins    { font-size: clamp(0.9rem, 2.5vw, 3vw); }
+    .delay-cols.medium .delay-row     { padding: 0.25rem 0; }
+    .delay-cols.many .delay-mission   { font-size: clamp(0.65rem, 1.6vw, 2vw); }
+    .delay-cols.many .delay-mins      { font-size: clamp(0.6rem, 1.4vw, 1.8vw); }
+    .delay-cols.many .delay-row       { padding: 0.1rem 0; border-bottom-width: 1px; }
     .no-delay {
       display: flex; align-items: center; justify-content: center;
       height: 100%; flex-direction: column; gap: 1rem;
@@ -533,7 +545,7 @@
     for (var n = 0; n < retards.length; n++) newPrev[retards[n].mission] = true;
     prevMissions = newPrev;
 
-    el.innerHTML = '<div class="delay-cols"><div>' + buildCol(col1) + '</div><div>' + buildCol(col2) + '</div></div>';
+    var nbTotal = retards.length; var sizeClass = nbTotal <= 3 ? 'few' : nbTotal <= 6 ? 'medium' : 'many'; el.innerHTML = '<div class="delay-cols ' + sizeClass + '"><div>' + buildCol(col1) + '</div><div>' + buildCol(col2) + '</div></div>';
   }
 
   // ── ÉTAT TRAFIC ───────────────────────────────────────────
