@@ -915,16 +915,8 @@ function actuAfficherImage() {
 
   actuTimer = setTimeout(function() {
     actuIndex++;
-    if (actuIndex >= actuListe.length) {
-      // Fin du carrousel → pause sur page normale
-      actuIndex = 0;
-      document.getElementById('overlay-actu').style.display = 'none';
-      actuTimer = setTimeout(function() {
-        if (!actuIncident && !estFinDeService()) actuAfficherImage();
-      }, DUREE_FLUIDE * 1000);
-    } else {
-      actuAfficherImage();
-    }
+    if (actuIndex >= actuListe.length) actuIndex = 0;
+    actuAfficherImage();
   }, duree);
 }
 
