@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPERA Actu — Administration</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #171c2e;
+    --border: #1e2540;
+    --accent: #e8392d;
+    --accent2: #ff6b35;
+    --green: #2ecc71;
+    --text: #e8eaf2;
+    --muted: #5a6080;
+    --worker: https://rera-proxy.sammy-avcuoglu.workers.dev;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    font-size: 15px;
+  }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 60% 40%, #1a0f2e 0%, var(--bg) 60%);
+  }
+
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+  }
+
+  .login-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .login-logo span { color: var(--accent); }
+
+  .login-sub {
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 36px;
+    letter-spacing: 0.05em;
+  }
+
+  .login-box input[type="password"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    text-align: center;
+    letter-spacing: 0.15em;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .login-box input[type="password"]:focus { border-color: var(--accent); }
+
+  .btn-login {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn-login:hover { background: #c72d22; }
+  .btn-login:active { transform: scale(0.98); }
+
+  .login-error {
+    color: var(--accent);
+    font-size: 13px;
+    margin-top: 12px;
+    font-family: 'DM Mono', monospace;
+    display: none;
+  }
+
+  /* ── APP ── */
+  #app { display: none; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.3px;
+  }
+
+  .topbar-title span { color: var(--accent); }
+
+  .topbar-line {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  main { padding: 24px; max-width: 800px; margin: 0 auto; }
+
+  /* ── SECTION ── */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* ── UPLOAD ── */
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(232, 57, 45, 0.04);
+  }
+
+  .drop-zone input[type="file"] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .drop-icon { font-size: 36px; margin-bottom: 12px; }
+
+  .drop-text {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .drop-text strong { color: var(--text); }
+
+  .upload-progress {
+    margin-top: 16px;
+    display: none;
+  }
+
+  .progress-bar {
+    background: var(--border);
+    border-radius: 4px;
+    height: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%;
+    transition: width 0.3s;
+    border-radius: 4px;
+  }
+
+  .upload-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  /* ── LISTE IMAGES ── */
+  #images-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .img-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.2s;
+    cursor: grab;
+  }
+
+  .img-item:hover { border-color: #2a3050; }
+  .img-item.dragging { opacity: 0.4; cursor: grabbing; }
+  .img-item.drag-over { border-color: var(--accent); background: rgba(232,57,45,0.06); }
+
+  .drag-handle {
+    color: var(--muted);
+    font-size: 18px;
+    cursor: grab;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .img-thumb {
+    width: 56px; height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .img-info { flex: 1; min-width: 0; }
+
+  .img-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+
+  .img-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .duree-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .duree-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    width: 60px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .duree-input:focus { border-color: var(--accent); }
+
+  .toggle-actif {
+    width: 36px; height: 20px;
+    background: var(--border);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+    border: none;
+  }
+
+  .toggle-actif.on { background: var(--green); }
+
+  .toggle-actif::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: white;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform 0.2s;
+  }
+
+  .toggle-actif.on::after { transform: translateX(16px); }
+
+  .btn-delete {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 6px 8px;
+    font-size: 14px;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .btn-delete:hover { border-color: var(--accent); color: var(--accent); }
+
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 32px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── SAVE ── */
+  .btn-save {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 16px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-save:hover { background: #c72d22; }
+  .btn-save:active { transform: scale(0.99); }
+  .btn-save:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+  .save-feedback {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    margin-top: 10px;
+    height: 16px;
+    transition: color 0.3s;
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--accent); color: var(--accent); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 500px) {
+    main { padding: 16px; }
+    .login-box { padding: 32px 24px; }
+    .section { padding: 18px; }
+    .img-item { gap: 10px; padding: 12px; }
+    .img-thumb { width: 44px; height: 32px; }
+    .topbar { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">OPERA <span>Actu</span></div>
+    <div class="login-sub">CCU VINCENNES — RER A</div>
+    <input type="password" id="pwd-input" placeholder="••••••••" autocomplete="current-password">
+    <button class="btn-login" onclick="login()">Accéder</button>
+    <div class="login-error" id="login-error">Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">OPERA <span>Actu</span></div>
+      <div class="topbar-line"><span class="status-dot"></span>ADMINISTRATION</div>
+    </div>
+    <div class="topbar-line" id="nb-images">0 image(s)</div>
+  </div>
+
+  <main>
+
+    <!-- UPLOAD -->
+    <div class="section">
+      <div class="section-title">Ajouter des images</div>
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)">
+        <div class="drop-icon">🖼️</div>
+        <div class="drop-text">
+          <strong>Glisser-déposer</strong> ou cliquer pour sélectionner<br>
+          PNG, JPG — plusieurs fichiers acceptés
+        </div>
+      </div>
+      <div class="upload-progress" id="upload-progress">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="upload-status" id="upload-status">Envoi en cours...</div>
+      </div>
+    </div>
+
+    <!-- LISTE -->
+    <div class="section">
+      <div class="section-title">Carrousel — ordre & durées</div>
+      <div id="images-list">
+        <div class="empty-state">Aucune image — ajoutez-en ci-dessus</div>
+      </div>
+    </div>
+
+    <!-- SAVE -->
+    <div class="section">
+      <button class="btn-save" onclick="sauvegarder()" id="btn-save">
+        💾 Sauvegarder le carrousel
+      </button>
+      <div class="save-feedback" id="save-feedback"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const WORKER = 'https://rera-proxy.sammy-avcuoglu.workers.dev';
+  let PASSWORD = '';
+  let liste = [];
+  let dragSrc = null;
+
+  // ── LOGIN ──
+  document.getElementById('pwd-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  async function login() {
+    const pwd = document.getElementById('pwd-input').value;
+    if (!pwd) return;
+    // Vérification en chargeant la liste
+    try {
+      const r = await fetch(`${WORKER}/actu/liste`);
+      if (r.ok) {
+        PASSWORD = pwd;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        chargerListe();
+      }
+    } catch(e) {
+      // On tente quand même avec le mot de passe
+      PASSWORD = pwd;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      chargerListe();
+    }
+  }
+
+  // ── CHARGER LISTE ──
+  async function chargerListe() {
+    try {
+      const r = await fetch(`${WORKER}/actu/liste`);
+      liste = await r.json();
+      renderListe();
+    } catch(e) {
+      toast('Erreur de connexion au Worker', 'error');
+    }
+  }
+
+  // ── RENDER ──
+  function renderListe() {
+    const el = document.getElementById('images-list');
+    document.getElementById('nb-images').textContent = `${liste.length} image(s)`;
+    if (liste.length === 0) {
+      el.innerHTML = '<div class="empty-state">Aucune image — ajoutez-en ci-dessus</div>';
+      return;
+    }
+    el.innerHTML = '';
+    liste.forEach((img, i) => {
+      const div = document.createElement('div');
+      div.className = 'img-item';
+      div.draggable = true;
+      div.dataset.index = i;
+
+      div.innerHTML = `
+        <span class="drag-handle">⠿</span>
+        <img class="img-thumb" src="${WORKER}/actu/image/${encodeURIComponent(img.filename)}" alt="${img.nom}" onerror="this.style.background='#1e2540'">
+        <div class="img-info">
+          <div class="img-name">${img.nom}</div>
+          <div class="img-meta">
+            <span class="duree-label">Durée (s)</span>
+            <input class="duree-input" type="number" min="1" max="300" value="${img.duree}" onchange="liste[${i}].duree=parseInt(this.value)||10">
+          </div>
+        </div>
+        <button class="toggle-actif ${img.actif ? 'on' : ''}" onclick="toggleActif(${i}, this)" title="Activer/désactiver"></button>
+        <button class="btn-delete" onclick="supprimerImage(${i})" title="Supprimer">🗑</button>
+      `;
+
+      // Drag & drop
+      div.addEventListener('dragstart', e => { dragSrc = i; div.classList.add('dragging'); });
+      div.addEventListener('dragend', () => div.classList.remove('dragging'));
+      div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('drag-over'); });
+      div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+      div.addEventListener('drop', e => {
+        e.preventDefault();
+        div.classList.remove('drag-over');
+        if (dragSrc !== null && dragSrc !== i) {
+          const moved = liste.splice(dragSrc, 1)[0];
+          liste.splice(i, 0, moved);
+          renderListe();
+        }
+      });
+
+      el.appendChild(div);
+    });
+  }
+
+  function toggleActif(i, btn) {
+    liste[i].actif = !liste[i].actif;
+    btn.classList.toggle('on', liste[i].actif);
+  }
+
+  // ── UPLOAD ──
+  const dropZone = document.getElementById('drop-zone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  async function handleFiles(files) {
+    if (!files || files.length === 0) return;
+    const progressEl = document.getElementById('upload-progress');
+    const fillEl = document.getElementById('progress-fill');
+    const statusEl = document.getElementById('upload-status');
+    progressEl.style.display = 'block';
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      statusEl.textContent = `Envoi ${i+1}/${files.length} : ${file.name}`;
+      fillEl.style.width = `${Math.round((i / files.length) * 100)}%`;
+
+      const fd = new FormData();
+      fd.append('password', PASSWORD);
+      fd.append('file', file);
+
+      try {
+        const r = await fetch(`${WORKER}/actu/upload`, { method: 'POST', body: fd });
+        const data = await r.json();
+        if (!r.ok) {
+          toast(`Erreur : ${data.error}`, 'error');
+        }
+      } catch(e) {
+        toast(`Erreur upload : ${file.name}`, 'error');
+      }
+    }
+
+    fillEl.style.width = '100%';
+    statusEl.textContent = 'Upload terminé !';
+    setTimeout(() => { progressEl.style.display = 'none'; fillEl.style.width = '0%'; }, 2000);
+    await chargerListe();
+    toast('Image(s) ajoutée(s) ✓', 'success');
+  }
+
+  // ── SUPPRIMER ──
+  async function supprimerImage(i) {
+    const img = liste[i];
+    if (!confirm(`Supprimer "${img.nom}" ?`)) return;
+    try {
+      const r = await fetch(`${WORKER}/actu/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: PASSWORD, filename: img.filename })
+      });
+      const data = await r.json();
+      if (r.ok) {
+        liste.splice(i, 1);
+        renderListe();
+        toast('Image supprimée', 'success');
+      } else {
+        toast(`Erreur : ${data.error}`, 'error');
+      }
+    } catch(e) {
+      toast('Erreur de connexion', 'error');
+    }
+  }
+
+  // ── SAUVEGARDER ──
+  async function sauvegarder() {
+    const btn = document.getElementById('btn-save');
+    const feedback = document.getElementById('save-feedback');
+    btn.disabled = true;
+    btn.textContent = 'Sauvegarde...';
+    try {
+      const r = await fetch(`${WORKER}/actu/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: PASSWORD, liste })
+      });
+      const data = await r.json();
+      if (r.ok) {
+        feedback.style.color = 'var(--green)';
+        feedback.textContent = '✓ Sauvegardé avec succès';
+        toast('Carrousel sauvegardé ✓', 'success');
+      } else {
+        feedback.style.color = 'var(--accent)';
+        feedback.textContent = `Erreur : ${data.error}`;
+      }
+    } catch(e) {
+      feedback.style.color = 'var(--accent)';
+      feedback.textContent = 'Erreur de connexion';
+    }
+    btn.disabled = false;
+    btn.innerHTML = '💾 Sauvegarder le carrousel';
+    setTimeout(() => feedback.textContent = '', 4000);
+  }
+
+  // ── TOAST ──
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>
