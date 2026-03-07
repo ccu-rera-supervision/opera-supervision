@@ -30,89 +30,8 @@
     font-size: 15px;
   }
 
-  /* ── LOGIN ── */
-  #login-screen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(ellipse at 60% 40%, #1a0f2e 0%, var(--bg) 60%);
-  }
-
-  .login-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 48px 40px;
-    width: 100%;
-    max-width: 380px;
-    text-align: center;
-  }
-
-  .login-logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 28px;
-    letter-spacing: -0.5px;
-    margin-bottom: 4px;
-  }
-
-  .login-logo span { color: var(--accent); }
-
-  .login-sub {
-    color: var(--muted);
-    font-size: 13px;
-    font-family: 'DM Mono', monospace;
-    margin-bottom: 36px;
-    letter-spacing: 0.05em;
-  }
-
-  .login-box input[type="password"] {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 16px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 16px;
-    text-align: center;
-    letter-spacing: 0.15em;
-    outline: none;
-    transition: border-color 0.2s;
-    margin-bottom: 16px;
-  }
-
-  .login-box input[type="password"]:focus { border-color: var(--accent); }
-
-  .btn-login {
-    width: 100%;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .btn-login:hover { background: #c72d22; }
-  .btn-login:active { transform: scale(0.98); }
-
-  .login-error {
-    color: var(--accent);
-    font-size: 13px;
-    margin-top: 12px;
-    font-family: 'DM Mono', monospace;
-    display: none;
-  }
-
   /* ── APP ── */
-  #app { display: none; }
+  #app { display: block; }
 
   .topbar {
     background: var(--surface);
@@ -478,17 +397,6 @@
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">OPERA <span>Actu</span></div>
-    <div class="login-sub">CCU VINCENNES — RER A</div>
-    <input type="password" id="pwd-input" placeholder="••••••••" autocomplete="current-password">
-    <button class="btn-login" onclick="login()">Accéder</button>
-    <div class="login-error" id="login-error">Mot de passe incorrect</div>
-  </div>
-</div>
-
 <!-- APP -->
 <div id="app">
   <div class="topbar">
@@ -542,43 +450,12 @@
 
 <script>
   const WORKER = 'https://rera-proxy.sammy-avcuoglu.workers.dev';
-  let PASSWORD = '';
+  const PASSWORD = 'opera2026';
   let liste = [];
   let dragSrc = null;
 
-  // ── LOGIN ──
-  document.getElementById('pwd-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') login();
-  });
-
-  async function login() {
-    const pwd = document.getElementById('pwd-input').value.trim();
-    if (!pwd) return;
-
-    // On vérifie le mot de passe en tentant un save vide
-    try {
-      const r = await fetch(`${WORKER}/actu/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: pwd, liste: [] })
-      });
-      // On recharge ensuite la vraie liste
-      const check = await fetch(`${WORKER}/actu/liste`);
-      const data = await check.json();
-      if (r.status === 401) {
-        document.getElementById('login-error').style.display = 'block';
-        return;
-      }
-      PASSWORD = pwd;
-      liste = Array.isArray(data) ? data : [];
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      renderListe();
-    } catch(e) {
-      document.getElementById('login-error').style.display = 'block';
-      document.getElementById('login-error').textContent = 'Erreur de connexion au serveur';
-    }
-  }
+  // Chargement automatique au démarrage
+  chargerListe();
 
   // ── CHARGER LISTE ──
   async function chargerListe() {
@@ -646,12 +523,21 @@
     btn.classList.toggle('on', liste[i].actif);
   }
 
-  function toggleEpingle(i, btn) {
-    // Désépingler toutes les autres d'abord
+  async function toggleEpingle(i, btn) {
     liste.forEach((img, j) => { if (j !== i) img.epingle = false; });
     liste[i].epingle = !liste[i].epingle;
+    // Sauvegarde automatique dans le KV
+    try {
+      await fetch(`${WORKER}/actu/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: PASSWORD, liste })
+      });
+      toast(liste[i].epingle ? '📌 Image épinglée — diffusion continue' : 'Épingle retirée', 'success');
+    } catch(e) {
+      toast('Erreur de sauvegarde', 'error');
+    }
     renderListe();
-    toast(liste[i].epingle ? '📌 Image épinglée — diffusion continue' : 'Épingle retirée', liste[i].epingle ? 'success' : 'success');
   }
 
   // ── UPLOAD ──
