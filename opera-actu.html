@@ -386,6 +386,24 @@
 
   .btn-delete:hover { border-color: var(--accent); color: var(--accent); }
 
+  .btn-pin {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 6px 8px;
+    font-size: 14px;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    flex-shrink: 0;
+  }
+  .btn-pin.epingle {
+    border-color: #f39c12;
+    color: #f39c12;
+    background: rgba(243,156,18,0.1);
+  }
+  .btn-pin:hover { border-color: #f39c12; color: #f39c12; }
+
   .empty-state {
     text-align: center;
     color: var(--muted);
@@ -595,9 +613,11 @@
           <div class="img-name">${img.nom}</div>
           <div class="img-meta">
             <span class="duree-label">Durée (s)</span>
-            <input class="duree-input" type="number" min="1" max="300" value="${img.duree}" onchange="liste[${i}].duree=parseInt(this.value)||10">
+            <input class="duree-input" type="number" min="1" max="300" value="${img.duree}" ${img.epingle ? 'disabled' : ''} onchange="liste[${i}].duree=parseInt(this.value)||10">
+            ${img.epingle ? '<span style="font-size:11px;color:#f39c12;font-family:DM Mono,monospace;">∞ en diffusion</span>' : ''}
           </div>
         </div>
+        <button class="btn-pin ${img.epingle ? 'epingle' : ''}" onclick="toggleEpingle(${i}, this)" title="${img.epingle ? 'Désépingler' : 'Diffuser en continu'}">📌</button>
         <button class="toggle-actif ${img.actif ? 'on' : ''}" onclick="toggleActif(${i}, this)" title="Activer/désactiver"></button>
         <button class="btn-delete" onclick="supprimerImage(${i})" title="Supprimer">🗑</button>
       `;
@@ -624,6 +644,14 @@
   function toggleActif(i, btn) {
     liste[i].actif = !liste[i].actif;
     btn.classList.toggle('on', liste[i].actif);
+  }
+
+  function toggleEpingle(i, btn) {
+    // Désépingler toutes les autres d'abord
+    liste.forEach((img, j) => { if (j !== i) img.epingle = false; });
+    liste[i].epingle = !liste[i].epingle;
+    renderListe();
+    toast(liste[i].epingle ? '📌 Image épinglée — diffusion continue' : 'Épingle retirée', liste[i].epingle ? 'success' : 'success');
   }
 
   // ── UPLOAD ──
