@@ -876,8 +876,21 @@ function actuDemarrer() {
   actuAfficherImage();
 }
 
+function estFinDeService() {
+  var h = new Date().getHours();
+  return (h >= 2 && h < 4);
+}
+
 function actuAfficherImage() {
   if (actuIncident || actuListe.length === 0) return;
+  if (estFinDeService()) {
+    // Entre 2h et 4h : fin de service prioritaire, on recheck dans 5 min
+    document.getElementById('overlay-actu').style.display = 'none';
+    actuTimer = setTimeout(function() {
+      if (!actuIncident) actuAfficherImage();
+    }, 300000);
+    return;
+  }
   var img    = actuListe[actuIndex];
   var duree  = (img.duree || 10) * 1000;
   var overlay = document.getElementById('overlay-actu');
@@ -907,7 +920,7 @@ function actuAfficherImage() {
       actuIndex = 0;
       document.getElementById('overlay-actu').style.display = 'none';
       actuTimer = setTimeout(function() {
-        if (!actuIncident) actuAfficherImage();
+        if (!actuIncident && !estFinDeService()) actuAfficherImage();
       }, DUREE_FLUIDE * 1000);
     } else {
       actuAfficherImage();
